@@ -4,7 +4,6 @@ import { Node } from './node';
 import { Renderer } from '..';
 
 const DEFAULT_TILE_SIZE: number = 16;
-const KEY_DELIMITER: string = ',';
 
 export interface TileMapParams {
     marginLeft?: number,
@@ -13,12 +12,12 @@ export interface TileMapParams {
     paddingY?: number,
 };
 
-const DEAFULT_PARAMS: TileMapParams = {
+const DEFAULT_PARAMS: TileMapParams = {
     marginLeft: 0,
     marginTop: 0,
     paddingX: 0,
     paddingY: 0,
-}
+};
 
 export class TileMap extends Node {
     private _map: Map<string, vec2> = new Map<string, vec2>();
@@ -37,7 +36,7 @@ export class TileMap extends Node {
 
         this._texture = texture;
         this._tileSize = tileSize;
-        this._params = { ...DEAFULT_PARAMS, ...params };
+        this._params = { ...DEFAULT_PARAMS, ...params };
     }
 
     setTile(mapPosition: vec2, tilePosition: vec2) {
@@ -49,65 +48,45 @@ export class TileMap extends Node {
     }
 
     render(renderer: Renderer) {
-        console.warn('TileMap.render: this method is a WiP');
-        // const screenSize: vec2 = vec2.fromValues(_GL.ctx.canvas.width, _GL.ctx.canvas.height);
+        const screenSize: vec2 = vec2.fromValues(renderer.width, renderer.height);
 
-        // const canvas: OffscreenCanvas = new OffscreenCanvas(screenSize[0], screenSize[1]);
-        // const ctx: OffscreenRenderingContext = canvas.getContext('2d');
+        const maxTiles: vec2 = vec2.fromValues(
+            Math.floor(screenSize[0] / this._tileSize[0]),
+            Math.floor(screenSize[1] / this._tileSize[1])
+        );
 
-        // // move offscreen canvas so 0, 0 is the center:
-        // ctx.translate(
-        //     (screenSize[0] / 2.0) - (this._tileSize[0] / 2.0),
-        //     (screenSize[1] / 2.0) - (this._tileSize[1] / 2.0),
-        // );
+        const tileCount: vec2 = vec2.fromValues(
+            Math.floor((maxTiles[0] + 1) / 2.0),
+            Math.floor((maxTiles[1] + 1) / 2.0),
+        );
 
-        // const maxTiles: vec2 = vec2.fromValues(
-        //     Math.floor(screenSize[0] / this._tileSize[0]),
-        //     Math.floor(screenSize[1] / this._tileSize[1])
-        // );
+        for (let x = -tileCount[0]; x <= tileCount[0]; x += 1) {
+            for (let y = -tileCount[1]; y <= tileCount[1]; y += 1) {
+                const mapPosition: vec2 = vec2.fromValues(x, y);
+                const tilePosition: vec2 = this._map.get(mapPosition.toString());
 
-        // const tileCount: vec2 = vec2.fromValues(
-        //     Math.floor((maxTiles[0] + 1) / 2.0),
-        //     Math.floor((maxTiles[1] + 1) / 2.0),
-        // );
+                if (tilePosition) {
+                    vec2.multiply(mapPosition, mapPosition, this._tileSize);
 
-        // for (let x = -tileCount[0]; x <= tileCount[0]; x += 1) {
-        //     for (let y = -tileCount[1]; y <= tileCount[1]; y += 1) {
-        //         const mapPosition: vec2 = vec2.fromValues(x, y);
-        //         const tilePosition: vec2 = this._map.get(mapPosition.toString());
+                    const region: vec4 = vec4.fromValues(
+                        this._params.marginLeft + (tilePosition[0] * this._tileSize[0]),
+                        this._params.marginTop + (tilePosition[1] * this._tileSize[1]),
+                        this._tileSize[0], this._tileSize[1],
+                    );
 
-        //         if (tilePosition) {
-        //             vec2.multiply(mapPosition, mapPosition, this._tileSize);
+                    renderer.drawImage(
+                        this._texture.image,
 
-        //             const region: vec4 = vec4.fromValues(
-        //                 this._params.marginLeft + (tilePosition[0] * this._tileSize[0]),
-        //                 this._params.marginTop + (tilePosition[1] * this._tileSize[1]),
-        //                 this._tileSize[0], this._tileSize[1],
-        //             );
+                        this.worldMatrix[6] + mapPosition[0] - (region[2] / 2.0),
+                        this.worldMatrix[7] + mapPosition[1] - (region[3] / 2.0),
+                        region[2], region[3],
 
-        //             ctx.drawImage(
-        //                 this._texture.image,
-        //                 region[0], region[1],
-        //                 region[2], region[2],
-        //                 mapPosition[0], mapPosition[1],
-        //                 region[2], region[2],
-        //             );
-        //         }
-        //     }
-        // }
-
-        // const imageBitmap = canvas.transferToImageBitmap();
-
-        // const texture: WebGLTexture = _GL.ctx.createTexture();
-        // _GL.ctx.activeTexture(_GL.ctx.TEXTURE0);
-        // _GL.ctx.bindTexture(_GL.ctx.TEXTURE_2D, texture);
-        // _GL.ctx.texParameteri(_GL.ctx.TEXTURE_2D, _GL.ctx.TEXTURE_WRAP_S, _GL.ctx.CLAMP_TO_EDGE);
-        // _GL.ctx.texParameteri(_GL.ctx.TEXTURE_2D, _GL.ctx.TEXTURE_WRAP_T, _GL.ctx.CLAMP_TO_EDGE);
-        // _GL.ctx.texParameteri(_GL.ctx.TEXTURE_2D, _GL.ctx.TEXTURE_MIN_FILTER, _GL.ctx.NEAREST);
-        // _GL.ctx.texParameteri(_GL.ctx.TEXTURE_2D, _GL.ctx.TEXTURE_MAG_FILTER, _GL.ctx.NEAREST);
-        // _GL.ctx.texImage2D(_GL.ctx.TEXTURE_2D, 0, _GL.ctx.RGBA, _GL.ctx.RGBA, _GL.ctx.UNSIGNED_BYTE, imageBitmap);
-
-        // this._render(texture, imageBitmap.width, imageBitmap.height);
+                        region[0], region[1],
+                        region[2], region[3],
+                    );
+                }
+            }
+        }
 
         super.render(renderer);
     }

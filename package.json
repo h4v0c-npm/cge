@@ -1,10 +1,11 @@
 {
     "name": "@h4v0c/cge",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A simple HTML Canvas Game Engine",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
+        "dev": "onchange './src/**/*' -- npm run build",
         "build": "npm run clean && tsc && npm run copy-files",
         "clean": "shx rm -rf ./dist",
         "copy-files": "shx cp ./src/css/*.css ./dist/css/",
@@ -24,6 +25,7 @@
     "devDependencies": {
         "@types/node": "^18.16.1",
         "css-loader": "^6.7.3",
+        "onchange": "^7.1.0",
         "raw-loader": "^4.0.2",
         "style-loader": "^3.3.2",
         "typescript": "^5.0.4"
