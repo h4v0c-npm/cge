@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "module": "commonjs",
+        "moduleResolution": "node16",
+        "outDir": "dist",
+        "preserveConstEnums": true,
+        "rootDir": "src",
+        "sourceMap": true,
+        "target": "es2015"
+    },
+    "include": [
+        "src"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
