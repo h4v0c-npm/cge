@@ -1,4 +1,3 @@
-// import { _GL } from '../utils/webgl';
-// import { Node } from './node';
+import { Node } from './node';
 
-// export class Scene extends Node { }
+export class Scene extends Node { }
