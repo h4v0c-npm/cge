@@ -232,7 +232,6 @@ export class Renderer extends Base {
 
     drawRect(rect: vec4, params: DrawParams = DEFAULT_DRAW_PARAMS) {
         params = { ...DEFAULT_DRAW_PARAMS, ...params };
-        // rect = vec4.fromValues(rect.x, rect.y, rect.w, rect.h);
 
         this._updateContextStyle(params);
 
