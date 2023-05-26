@@ -1,5 +1,8 @@
 import { vec2, vec4 } from 'gl-matrix';
-import { Base, PI_X2 } from './utils';
+import { Clock } from './clock';
+import { PI_X2 } from './utils';
+import { Scene } from './nodes/scene';
+import { Camera } from './nodes/camera';
 
 const DEFAULT_LINE_COLOR = 'white';
 const DEFAULT_FILL_COLOR = 'white';
@@ -11,6 +14,9 @@ const DEFAULT_SHADOW_BLUR = 0;
 const DEFAULT_SHADOW_COLOR = 'grey';
 const DEFAULT_TEXT_ALIGN = 'start';
 const DEFAULT_TEXT_BASE_LINE = 'alphabetic';
+
+export declare type RenderLoopStats = { time: number, deltaTime: number, fps: number };
+export declare type RenderLoopCallback = (stats: RenderLoopStats) => void;
 
 export interface DrawParams {
     centered?: boolean,
@@ -33,9 +39,13 @@ const DEFAULT_DRAW_PARAMS: DrawParams = {
     padding: 0,
 };
 
-export class Renderer extends Base {
+export class Renderer {
     private _canvas: HTMLCanvasElement;
     private _ctx: CanvasRenderingContext2D;
+
+    private _clock: Clock = new Clock();
+    private _renderLoopCallback: RenderLoopCallback;
+
     private _center: vec2 = vec2.create();
     private _origin: vec2 = vec2.create();
 
@@ -49,6 +59,8 @@ export class Renderer extends Base {
     private _shadowColor: string = DEFAULT_SHADOW_COLOR;
     private _textAlign: CanvasTextAlign = DEFAULT_TEXT_ALIGN;
     private _textBaseline: CanvasTextBaseline = DEFAULT_TEXT_BASE_LINE;
+
+    get clock(): Clock { return this._clock; }
 
     get width(): number { return this._canvas.width; }
     get height(): number { return this._canvas.height; }
@@ -122,8 +134,6 @@ export class Renderer extends Base {
     }
 
     constructor(canvas?: HTMLCanvasElement) {
-        super();
-
         this._canvas = canvas ?? document.createElement('canvas');
         this._canvas.style.display = 'block';
 
@@ -286,25 +296,42 @@ export class Renderer extends Base {
         }
     }
 
-    // getImage(name: string): HTMLImageElement | null {
-    //     if (this._images.hasOwnProperty(name)) return this._images[name];
-    //     else return null;
-    // }
+    private _renderLoop(time: number) {
+        this._clock.update(time);
 
-    // loadImage(name: string, src: string): Promise<void> {
-    //     return new Promise<void>((success, failed) => {
-    //         const image: HTMLImageElement = new Image();
+        if (this._renderLoopCallback) {
+            this._renderLoopCallback({
+                time,
+                deltaTime: this._clock.deltaTime,
+                fps: this._clock.fps
+            });
 
-    //         image.addEventListener('load', (ev: Event) => {
-    //             this._images[name] = image;
-    //             log('image', src, 'loaded');
-    //             success();
-    //         });
+            requestAnimationFrame(this._renderLoop.bind(this));
+        }
+    }
 
-    //         image.addEventListener('error', (ev: ErrorEvent) => { throw ev.message; });
+    setRenderLoopCallback(callback?: RenderLoopCallback) {
+        this._renderLoopCallback = null;
 
-    //         image.src = src;
-    //     });
-    // }
+        if (callback) {
+            this._renderLoopCallback = callback;
+            requestAnimationFrame(this._renderLoop.bind(this));
+        }
+    }
+
+    render(scene: Scene, camera?: Camera) {
+        this.clear();
+        this.resize();
+
+        if (camera) {
+            camera.updateWorldMatrix();
+            camera.update(this._clock.time, this._clock.deltaTime);
+            camera.render(this);
+        }
+
+        scene.updateWorldMatrix(camera?.projectionMatrix);
+
+        scene.update(this._clock.time, this._clock.deltaTime);
+        scene.render(this);
+    }
 }
-

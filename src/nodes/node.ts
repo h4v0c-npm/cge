@@ -1,5 +1,5 @@
 import { mat3, vec2 } from 'gl-matrix';
-import { Base } from '../utils/base';
+import { Base } from './base';
 import { Renderer } from '../renderer';
 
 export class Node extends Base {
@@ -36,8 +36,12 @@ export class Node extends Base {
         mat3.scale(this.localMatrix, this.localMatrix, this.scale);
     }
 
-    updateWorldMatrix() {
+    updateWorldMatrix(otherMatrix?: mat3) {
         this.updateLocalMatrix();
+
+        if (otherMatrix) {
+            mat3.multiply(this.localMatrix, this.localMatrix, otherMatrix);
+        }
 
         if (this.parent) {
             mat3.multiply(this.worldMatrix, this.localMatrix, this.parent.worldMatrix);

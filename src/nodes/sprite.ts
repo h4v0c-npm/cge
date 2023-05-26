@@ -1,5 +1,5 @@
-import { mat3, vec2, vec4 } from 'gl-matrix';
-import { Texture } from '../resources/texture';
+import { vec2, vec4 } from 'gl-matrix';
+import { Texture } from '../texture';
 import { Node } from './node';
 import { Renderer } from '../renderer';
 
@@ -14,7 +14,7 @@ export class Sprite extends Node {
     }
 
     region: vec4;
-    centered: boolean = true; // TODO: currently, changing this to false does nothing, need to fix that... possibly setup an origin matrix...
+    centered: boolean = true;
 
     constructor(texture?: Texture) {
         super();
