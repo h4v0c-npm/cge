@@ -259,7 +259,9 @@ export class Renderer {
 
         this._ctx.beginPath();
         this._ctx.rect(rect[0], rect[1], rect[2], rect[3]);
-        this._ctx[params.filled ? 'fill' : 'stroke']();
+        this._ctx.stroke();
+
+        if (params.filled) this._ctx.fill();
     }
 
     drawText(position: vec2, text: string | number, params: any = DEFAULT_DRAW_PARAMS) {
