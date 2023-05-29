@@ -26,25 +26,11 @@ export class AnimatedSprite extends Sprite {
     }
 
     render(renderer: Renderer) {
-        let frame: vec4 = this.region;
-
         if (this.frames.length > 0) {
-            frame = this.frames[this.frameIndex];
+            this.region = this.frames[this.frameIndex];
         }
 
-        const pos: vec2 = vec2.fromValues(this.worldMatrix[6], this.worldMatrix[7]);
-
-        if (this.centered) {
-            pos[0] -= (frame[2] / 2.0);
-            pos[1] -= (frame[3] / 2.0);
-        }
-
-        renderer.drawImage(
-            this._texture.image,
-            pos[0], pos[1], frame[2], frame[3],
-            frame[0], frame[1],
-            frame[2], frame[3],
-        );
+        super.render(renderer);
 
         this.children.forEach((child: Node) => child.render(renderer));
     }

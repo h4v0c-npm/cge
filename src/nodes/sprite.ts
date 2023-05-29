@@ -26,15 +26,17 @@ export class Sprite extends Node {
 
     render(renderer: Renderer) {
         const pos: vec2 = vec2.fromValues(this.worldMatrix[6], this.worldMatrix[7]);
+        const scale: vec2 = vec2.fromValues(this.worldMatrix[0], this.worldMatrix[4]);
 
         if (this.centered) {
-            pos[0] -= (this.region[2] / 2.0);
-            pos[1] -= (this.region[3] / 2.0);
+            pos[0] -= ((this.region[2] * scale[0]) / 2.0);
+            pos[1] -= ((this.region[3] * scale[1]) / 2.0);
         }
 
         renderer.drawImage(
             this._texture.image,
-            pos[0], pos[1], this.region[2], this.region[3],
+            pos[0], pos[1],
+            this.region[2] * scale[0], this.region[3] * scale[1],
             this.region[0], this.region[1],
             this.region[2], this.region[3],
         );
